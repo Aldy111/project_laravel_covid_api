@@ -190,6 +190,49 @@ class PatientsController extends Controller
      */
     public function destroy($id)
     {
+
         //
+        $patient = Patients::find($id);
+        if ($patient) {
+            $patient->delete();
+            $messages = [
+                'message' => 'delete successfully',
+                'data' => $patient
+            ];
+
+            return response()->json($messages, 200);
+        } else {
+            $messages = [
+                'message' => 'not found'
+            ];
+            return response()->json($messages, 404);
+        }
+    }
+
+    public function search($name)
+    {
+        $patients = Patients::where('name', 'like', "%$name%")->get();
+
+
+        if ($patients->isNotEmpty()) {
+            $patients = $patients->map(
+                function ($patient) {
+                    return $this->formatPatient($patient);
+                }
+            );
+
+            $messages =  [
+                'message' => 'Get Search Resource',
+                'total' => count($patients),
+                'data' => $patients
+            ];
+            return response()->json($messages, 200);
+        } else {
+
+            $messages = [
+                'message' => 'resource not found'
+            ];
+            return response()->json($messages, 404);
+        }
     }
 }
